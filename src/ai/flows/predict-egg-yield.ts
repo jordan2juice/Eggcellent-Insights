@@ -59,7 +59,8 @@ const predictEggYieldFlow = ai.defineFlow(
     outputSchema: predictEggYieldOutputSchema,
   },
   async (input) => {
-    const response = await prompt(input);
-    return response;
+    const { output } = await prompt(input);
+    return output!;
   }
 );
+
