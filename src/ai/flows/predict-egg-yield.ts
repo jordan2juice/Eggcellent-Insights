@@ -1,62 +1,69 @@
 "use server";
 
 /**
- * @fileOverview Predict egg yield based on various factors.
+ * @fileOverview Predicts future egg-laying trends based on historical data.
  *
- * predictEggYield - A functon to predict egg yield based on factors like feed type, age, and environment.
- * predictEggYieldInput - An input object for the predictEggYield function.
- * predictEggYieldOutput - An output object for the predictEggYield function.
- *
+ * - predictEggLayingTrends - A function that predicts egg-laying trends.
+ * - PredictEggLayingTrendsInput - The input type for the predictEggLayingTrends function.
+ * - PredictEggLayingTrendsOutput - The return type for the predictEggLayingTrends function.
  */
 
 import { ai } from "@/ai/genkit";
 import { z } from "genkit";
 
-const PreddictEggYieldInputSchema = z.object({
-  historicalData: z.string().describe("Historical egg production data"),
-  breed: z.string().describe("Breed of the poultry"),
-  feed: z.string().describe("Type of feed used"),
-  date: z.string().describe("Date for the prediction"),
+const PredictEggLayingTrendsInputSchema = z.object({
+  chickenType: z.string().describe("The type of chicken."),
+  feedConsumption: z
+    .string()
+    .describe("The daily feed consumption for the chicken type."),
+  eggCounts: z.string().describe("The daily egg counts for the chicken type."),
+  daysToPredict: z
+    .number()
+    .describe("The number of days into the future to predict."),
 });
+export type PredictEggLayingTrendsInput = z.infer<
+  typeof PredictEggLayingTrendsInputSchema
+>;
 
-export type PredictEggYieldInput = z.infer<typeof PreddictEggYieldInputSchema>;
-
-const predictEggYieldOutputSchema = z.object({
-  predictYield: z.number().describe("Predicted egg yield"),
-  explanation: z.string().describe("Explanation of the prediction"),
+const PredictEggLayingTrendsOutputSchema = z.object({
+  predictedLayingTrends: z
+    .string()
+    .describe(
+      "The predicted egg-laying trends for the specified number of days."
+    ),
 });
+export type PredictEggLayingTrendsOutput = z.infer<
+  typeof PredictEggLayingTrendsOutputSchema
+>;
 
-export type PredictEggYieldOutput = z.infer<typeof predictEggYieldOutputSchema>;
-
-async function PredictEggYield(
-  input: PredictEggYieldInput
-): Promise<PredictEggYieldOutput> {
-  return predictEggYieldFlow(input);
+export async function predictEggLayingTrends(
+  input: PredictEggLayingTrendsInput
+): Promise<PredictEggLayingTrendsOutput> {
+  return predictEggLayingTrendsFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: "predictEggYieldPrompt",
-  input: { schema: PreddictEggYieldInputSchema },
-  output: { schema: predictEggYieldOutputSchema },
-  prompt: `You are an expert in poultry farming. Given the historical egg production data, breed of the poultry, type of feed used, and the date for the prediction, provide an accurate prediction of egg yield along with a brief explanation.
+  name: "predictEggLayingTrendsPrompt",
+  input: { schema: PredictEggLayingTrendsInputSchema },
+  output: { schema: PredictEggLayingTrendsOutputSchema },
+  prompt: `You are an expert in predicting egg-laying trends for chickens.
 
-  Using the following information, predict the egg yield for the given date:
+  Analyze the historical data provided to predict future laying trends.  Consider the chicken type, feed consumption, and egg counts to make your prediction.
 
-    Historical Data: {{{historicalData}}}
-    Breed: {{{breed}}}
-    Feed: {{{feed}}}
-    Date: {{{date}}}
+  Chicken Type: {{{chickenType}}}
+  Feed Consumption: {{{feedConsumption}}}
+  Egg Counts: {{{eggCounts}}}
+  Days to Predict: {{{daysToPredict}}}
 
-    Provide a predicted egg yield and explain the factors influencing your prediction.
-    Ensure that the predictedYield is a number.
-    `,
+  Provide a detailed prediction of egg-laying trends for the next {{{daysToPredict}}} days.
+  `,
 });
 
-const predictEggYieldFlow = ai.defineFlow(
+const predictEggLayingTrendsFlow = ai.defineFlow(
   {
-    name: "predictEggYieldFlow",
-    inputSchema: PreddictEggYieldInputSchema,
-    outputSchema: predictEggYieldOutputSchema,
+    name: "predictEggLayingTrendsFlow",
+    inputSchema: PredictEggLayingTrendsInputSchema,
+    outputSchema: PredictEggLayingTrendsOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);
@@ -64,3 +71,4 @@ const predictEggYieldFlow = ai.defineFlow(
   }
 );
 
+export default predictEggLayingTrendsFlow;
